@@ -20,6 +20,16 @@ Answer `y` to add the marketplace and press Enter for the user scope. Then open 
 
 That's it: XP now records as you use Claude Code. Run `/agents-of-claude:coach` any time to have Claude review your Agent's recent duels and sharpen its Battle Journal.
 
+## Automatic sync (Claude desktop app)
+
+Open the game in the Claude desktop app and run this once in Claude Code:
+
+```
+/agents-of-claude:helper
+```
+
+It adds a small local helper to the desktop app (one config entry, backed up first), so the game syncs your XP every few minutes on its own and shows whether Claude is working right now. Quit and reopen the desktop app afterwards. Run it again with "remove the helper" to uninstall.
+
 ## While you work
 
 - **Milestones at the end of a turn**: work crates (every 150 XP), the bonus key and Inspired at 300, your streak, shipped commits. One short line, never mid-task. Set `AOC_QUIET=1` to silence them.
