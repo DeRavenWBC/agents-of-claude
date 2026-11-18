@@ -2,7 +2,8 @@
 // Agents of Claude — usage XP hook.
 // Registered for SessionStart, UserPromptSubmit, PostToolUse and Stop.
 // Appends one hash-chained line per XP event to the local ledger.
-// It never prints, never blocks and always exits 0, so it cannot disturb a session.
+// It never blocks and always exits 0, so it cannot disturb a session. At the end of a turn it may print
+// one short milestone line (set AOC_QUIET=1 to silence it).
 // Only event kinds and XP are stored: no prompt text, file names or commands.
 
 import fs from 'node:fs';
@@ -74,6 +75,10 @@ function withLock(fn) {
   // Could not get the lock in ~400 ms: drop this event rather than slow the session.
 }
 
+function ledgerXp(day) {
+  try { return fs.readFileSync(LEDGER, 'utf8').trimEnd().split('\n').slice(-5000).reduce((n, l) => { try { const j = JSON.parse(l); return j.day === day ? n + j.xp : n; } catch { return n; } }, 0); } catch { return 0; }
+}
+
 function lastLedgerLine() {
   try {
     const lines = fs.readFileSync(LEDGER, 'utf8').trimEnd().split('\n');
@@ -84,7 +89,7 @@ function lastLedgerLine() {
 function loadState() {
   try { return JSON.parse(fs.readFileSync(STATE, 'utf8')); } catch {}
   const last = lastLedgerLine();
-  return { head: last?.h ?? GENESIS, seq: last?.seq ?? 0, last: {}, day: '', perDay: {} };
+  return { head: last?.h ?? GENESIS, seq: last?.seq ?? 0, last: {}, day: '', perDay: {}, xpDay: 0, pending: [] };
 }
 
 export function record(input, now = new Date()) {
@@ -94,7 +99,9 @@ export function record(input, now = new Date()) {
   return withLock(() => {
     const st = loadState();
     const day = sastDay(now);
-    if (st.day !== day) { st.day = day; st.perDay = {}; }
+    if (st.day !== day) { st.day = day; st.perDay = {}; st.xpDay = 0; }
+    if (st.xpDay == null) st.xpDay = ledgerXp(day); // first run after updating: catch up from the ledger
+    const before = st.xpDay || 0;
     const written = [];
     for (const kind of kinds) {
       const rule = RULES[kind];
@@ -108,8 +115,40 @@ export function record(input, now = new Date()) {
       st.perDay[kind] = (st.perDay[kind] || 0) + 1;
       written.push(line);
     }
+    st.xpDay = before + written.reduce((n, l) => n + l.xp, 0);
+    st.pending = [...(st.pending || []), ...milestones(before, st.xpDay, written)].slice(-6);
     fs.writeFileSync(STATE, JSON.stringify(st));
     return written;
+  }) ?? [];
+}
+
+// Background feedback: little milestone notes, shown at the end of a turn so they never interrupt work.
+// Thresholds follow the game: a work crate every 150 raw XP (5 a day), the bonus key and Inspired at 300,
+// full-rate XP to 400, and nothing counts past 800.
+export function milestones(before, after, written = []) {
+  const out = [];
+  const crossed = (n) => before < n && after >= n;
+  for (let n = 150, i = 1; n <= 750; n += 150, i++) if (crossed(n)) out.push(`📦 Work crate ${i} earned`);
+  if (crossed(300)) out.push('🗝 bonus dungeon key earned, and your Agent is Inspired (+10% gold and XP today)');
+  if (crossed(400)) out.push('full-rate XP reached for today; the rest counts at half');
+  if (crossed(800)) out.push('daily XP maxed. Your Agent salutes you');
+  if (written.some(l => l.kind === 'shipped')) out.push('🚀 a commit shipped (+15 XP)');
+  if (written.some(l => l.kind === 'muster')) { const s = streakDays(); if (s > 1) out.push(`🔥 day ${s} of your streak`); }
+  return out;
+}
+function streakDays() {
+  try {
+    const days = new Set(fs.readFileSync(LEDGER, 'utf8').trimEnd().split('\n').slice(-5000).map(l => { try { return JSON.parse(l).day; } catch { return null; } }).filter(Boolean));
+    let n = 0, d = new Date();
+    while (days.has(sastDay(d))) { n++; d = new Date(d.getTime() - 86_400_000); }
+    return n;
+  } catch { return 0; }
+}
+export function takePending() {
+  return withLock(() => {
+    const st = loadState(); const msgs = st.pending || [];
+    if (!msgs.length) return [];
+    st.pending = []; fs.writeFileSync(STATE, JSON.stringify(st)); return msgs;
   }) ?? [];
 }
 
@@ -138,6 +177,10 @@ if (isMain) {
   try {
     const input = JSON.parse(fs.readFileSync(0, 'utf8') || '{}');
     record(input);
+    if (input.hook_event_name === 'Stop' && process.env.AOC_QUIET !== '1') {
+      const msgs = takePending();
+      if (msgs.length) process.stdout.write(JSON.stringify({ systemMessage: `⚔ Agents of Claude: ${msgs.join(' · ')}` }));
+    }
     if (input.hook_event_name === 'UserPromptSubmit') {
       const ctx = syncNudge();
       if (ctx) process.stdout.write(JSON.stringify({ hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: ctx } }));

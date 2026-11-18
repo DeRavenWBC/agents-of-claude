@@ -20,6 +20,12 @@ Answer `y` to add the marketplace and press Enter for the user scope. Then open 
 
 That's it: XP now records as you use Claude Code. Run `/agents-of-claude:coach` any time to have Claude review your Agent's recent duels and sharpen its Battle Journal.
 
+## While you work
+
+- **Milestones at the end of a turn**: work crates (every 150 XP), the bonus key and Inspired at 300, your streak, shipped commits. One short line, never mid-task. Set `AOC_QUIET=1` to silence them.
+- **Status line**: run `/agents-of-claude:statusline` to show your Agent, where it is and when it is back, and today's XP in Claude Code's status line.
+- **Your work speeds up the game**: every 8 XP you earn while your Agent is away brings it home a minute sooner (up to half the trip), and every 150 XP is a work crate in the game.
+
 ## What it does
 
 - **Records XP locally.** Hooks on session start, prompts, tool calls and finished turns append hash-chained XP events to `~/.claude/agents-of-claude/ledger.jsonl`. Only the event type and XP are stored: never your prompt text, file names or commands. Each hook call takes about 50 ms and can't block a session.
