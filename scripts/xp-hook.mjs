@@ -152,6 +152,20 @@ export function takePending() {
   }) ?? [];
 }
 
+// Which Claude Code sessions on this machine are active: each session's last event time, keyed by a
+// short hash of its id (nothing else is stored). Every session on the machine shares this file, so the
+// game can show "Claude is working" for any of them. Old entries are pruned after a day.
+const SESSIONS = path.join(DIR, 'sessions.json');
+export function touchSession(input, now = new Date()) {
+  const sid = String(input.session_id || ''); if (!sid) return;
+  const key = crypto.createHash('sha256').update(sid).digest('hex').slice(0, 10);
+  let s = {}; try { s = JSON.parse(fs.readFileSync(SESSIONS, 'utf8')); } catch {}
+  const t = now.getTime();
+  s[key] = { at: t, ended: input.hook_event_name === 'SessionEnd' };
+  for (const [k, v] of Object.entries(s)) if (t - v.at > DAY_MS) delete s[k];
+  fs.writeFileSync(SESSIONS, JSON.stringify(s));
+}
+
 // Fallback sync nudge. The game normally pulls XP itself (desktop app + local MCP server).
 // If nothing has synced for a day and there is new XP, ask Claude, once per 6 h at most,
 // to run /quest-sync after the user's request.
@@ -177,6 +191,7 @@ if (isMain) {
   try {
     const input = JSON.parse(fs.readFileSync(0, 'utf8') || '{}');
     record(input);
+    try { touchSession(input); } catch {}
     if (input.hook_event_name === 'Stop' && process.env.AOC_QUIET !== '1') {
       const msgs = takePending();
       if (msgs.length) process.stdout.write(JSON.stringify({ systemMessage: `⚔ Agents of Claude: ${msgs.join(' · ')}` }));

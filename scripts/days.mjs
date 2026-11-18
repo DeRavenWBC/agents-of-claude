@@ -44,7 +44,14 @@ export function buildDays(now = new Date()) {
   const docs = [...days.values()].sort((a, b) => a.day.localeCompare(b.day))
     .map(d => ({ ...d, chainOk: chain.ok, syncedAt, ledgerVersion: 1 }));
   const lastSeq = lines.filter(l => !l.bad).at(-1)?.seq ?? 0;
-  return { docs, chain, ledgerLines: lines.length, lastSeq };
+  const lastEvent = [...lines].reverse().find(l => !l.bad) || null;
+  // Claude Code sessions on this machine: working (event in the last 3 min) and open recently (30 min).
+  let sessions = { working: 0, recent: 0 };
+  try {
+    const s = JSON.parse(fs.readFileSync(path.join(path.dirname(SYNC_STATE), 'sessions.json'), 'utf8')), t = now.getTime();
+    for (const v of Object.values(s)) { if (v.ended) continue; if (t - v.at < 180_000) sessions.working++; else if (t - v.at < 1_800_000) sessions.recent++; }
+  } catch {}
+  return { docs, chain, ledgerLines: lines.length, lastSeq, lastEvent: lastEvent && { ts: lastEvent.ts, kind: lastEvent.kind }, sessions };
 }
 
 export function readSyncState() {
