@@ -1,0 +1,11 @@
+{
+  "name": "agents-of-claude",
+  "owner": { "name": "Agents of Claude" },
+  "plugins": [
+    {
+      "name": "agents-of-claude",
+      "source": "./",
+      "description": "Earn XP in Agents of Claude from your Claude Code usage."
+    }
+  ]
+}

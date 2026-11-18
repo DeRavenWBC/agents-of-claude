@@ -1,0 +1,59 @@
+// Shared ledger reading: chain verification, per-day totals, sync state.
+import fs from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+import { GENESIS, lineHash, sastDay } from './xp-hook.mjs';
+
+export const DIR = process.env.AOC_DIR || path.join(os.homedir(), '.claude', 'agents-of-claude');
+export const LEDGER = path.join(DIR, 'ledger.jsonl');
+export const SYNC_STATE = path.join(DIR, 'sync-state.json');
+export const WINDOW_DAYS = 14;
+
+export function readLedger() {
+  if (!fs.existsSync(LEDGER)) return [];
+  return fs.readFileSync(LEDGER, 'utf8').split('\n').filter(Boolean).map((s, i) => {
+    try { return JSON.parse(s); } catch { return { bad: true, lineNo: i + 1 }; }
+  });
+}
+
+export function verify(lines) {
+  let prev = GENESIS, seq = 0;
+  for (const [i, l] of lines.entries()) {
+    if (l.bad || l.prev !== prev || l.seq !== seq + 1 || lineHash(prev, l) !== l.h) return { ok: false, brokenAt: i + 1 };
+    prev = l.h; seq = l.seq;
+  }
+  return { ok: true, brokenAt: null };
+}
+
+// Per-day documents for the last 14 SAST days, shaped exactly as the game stores them.
+export function buildDays(now = new Date()) {
+  const lines = readLedger();
+  const chain = verify(lines);
+  const today = sastDay(now);
+  const oldest = sastDay(new Date(now.getTime() - (WINDOW_DAYS - 1) * 86_400_000));
+  const syncedAt = now.toISOString();
+  const days = new Map();
+  for (const l of lines) {
+    if (l.bad || l.day < oldest || l.day > today) continue;
+    const d = days.get(l.day) ?? { day: l.day, raw: 0, events: 0, counts: {}, chainHead: null };
+    d.raw += l.xp; d.events += 1;
+    d.counts[l.kind] = (d.counts[l.kind] || 0) + 1;
+    d.chainHead = l.h;
+    days.set(l.day, d);
+  }
+  const docs = [...days.values()].sort((a, b) => a.day.localeCompare(b.day))
+    .map(d => ({ ...d, chainOk: chain.ok, syncedAt, ledgerVersion: 1 }));
+  const lastSeq = lines.filter(l => !l.bad).at(-1)?.seq ?? 0;
+  return { docs, chain, ledgerLines: lines.length, lastSeq };
+}
+
+export function readSyncState() {
+  try { return JSON.parse(fs.readFileSync(SYNC_STATE, 'utf8')); } catch { return {}; }
+}
+
+export function updateSyncState(patch) {
+  const s = { ...readSyncState(), ...patch };
+  fs.mkdirSync(DIR, { recursive: true });
+  fs.writeFileSync(SYNC_STATE, JSON.stringify(s, null, 2));
+  return s;
+}
