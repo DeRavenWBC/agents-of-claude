@@ -26,6 +26,8 @@ try { fs.readFileSync(0); } catch {} // Claude Code passes session JSON on stdin
 const st = read(path.join(DIR, 'state.json')) || {};
 const xp = st.day === today ? st.xpDay || 0 : 0;
 const sum = findSummary(path.join(DIR, 'cache'));
+const clean = (v) => String(v ?? '').replace(/[\u0000-\u001f\u007f-\u009f]/g, '').slice(0, 40); // no terminal escape codes from game data
+if (sum) { sum.name = clean(sum.name); sum.doing = clean(sum.doing); sum.level = Number(sum.level) || 1; }
 const parts = [];
 if (sum?.name) parts.push(`⚔ ${sum.name} Lv ${sum.level}`); else parts.push('⚔ Agents of Claude');
 if (sum?.doing && sum.back) {

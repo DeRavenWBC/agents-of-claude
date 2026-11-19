@@ -51,6 +51,6 @@ rl.on('line', (line) => {
       default: return fail(id, -32601, `Method not found: ${method}`);
     }
   } catch (e) {
-    return reply(id, { content: [{ type: 'text', text: `Error: ${e.message}` }], isError: true });
+    return reply(id, { content: [{ type: 'text', text: 'Could not read the Agents of Claude XP ledger on this device.' }], isError: true });
   }
 });

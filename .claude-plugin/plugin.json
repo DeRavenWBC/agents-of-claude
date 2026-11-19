@@ -1,6 +1,6 @@
 {
   "name": "agents-of-claude",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Earn XP in Agents of Claude, the org pixel RPG, from your Claude Code usage, and coach your Agent between fights. Records XP locally and syncs daily totals to the game.",
   "license": "MIT"
 }

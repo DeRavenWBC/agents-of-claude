@@ -50,11 +50,14 @@ if (mode === 'check') {
   process.exit(0);
 }
 
+// Back up before every change (timestamped), then write atomically: a crash can never leave a half-written config.
 const save = () => {
-  const backup = cfgFile + '.aoc-backup';
-  if (fs.existsSync(cfgFile) && !fs.existsSync(backup)) fs.copyFileSync(cfgFile, backup);
-  fs.writeFileSync(cfgFile, JSON.stringify(cfg, null, 2) + '\n');
-  return fs.existsSync(backup) ? backup : null;
+  let backup = null;
+  if (fs.existsSync(cfgFile)) { backup = `${cfgFile}.aoc-backup-${new Date().toISOString().replace(/[:.]/g, '-')}`; fs.copyFileSync(cfgFile, backup); }
+  const tmp = `${cfgFile}.aoc-tmp-${process.pid}`;
+  fs.writeFileSync(tmp, JSON.stringify(cfg, null, 2) + '\n', { mode: 0o600 });
+  fs.renameSync(tmp, cfgFile);
+  return backup;
 };
 
 if (mode === 'uninstall') {

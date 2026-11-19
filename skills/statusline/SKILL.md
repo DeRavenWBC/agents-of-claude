@@ -1,7 +1,7 @@
 ---
 name: statusline
 description: Show your Agents of Claude Agent in Claude Code's status line (today's XP, where your Agent is, when it is back). Use when the player asks to add or set up the Agents of Claude status line.
-allowed-tools: Bash(node:*), Read, Edit
+allowed-tools: Bash(node *agents-of-claude*/scripts/statusline.mjs*), Read, Edit
 ---
 
 Set up the Agents of Claude status line for this player.

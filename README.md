@@ -39,7 +39,7 @@ It adds a small local helper to the desktop app (one config entry, backed up fir
 ## What it does
 
 - **Records XP locally.** Hooks on session start, prompts, tool calls and finished turns append hash-chained XP events to `~/.claude/agents-of-claude/ledger.jsonl`. Only the event type and XP are stored: never your prompt text, file names or commands. Each hook call takes about 50 ms and can't block a session.
-- **Syncs daily totals.** Run `/agents-of-claude:quest-sync`, or let it happen: if nothing has synced for 24 hours, Claude runs the sync after your next request. Only per-day totals reach the game, into a private record that only you can read. Other players see your level, not your usage.
+- **Syncs daily totals.** Run `/agents-of-claude:quest-sync`, or let it happen: if nothing has synced for 24 hours, Claude runs the sync after your next request. What reaches the game, into a private record only you can read: per-day XP, per-day counts of each kind of event (prompts, tool calls, edits, commits, finished turns), and a ledger checksum. With the desktop helper, the time and kind of your latest Claude Code event and how many sessions are active, for the "Claude is working" status. Never prompt text, file names, commands or code. Other players see your level, not your usage.
 
 | Earns XP | Base XP | Limit |
 | --- | --- | --- |
@@ -76,6 +76,13 @@ In the Claude desktop app, where `/plugin` doesn't run: click + next to the prom
 
 
 Then open the game, create your Agent (you need Contributor access to the page), and run `/agents-of-claude:quest-sync` once.
+
+## Security
+
+- Skills may only run their own script (`node .../scripts/<name>.mjs`), not arbitrary commands.
+- The helper installer backs up the desktop config before every change and writes it atomically.
+- XP is self-reported: the game caps it (400 a day in full, 400 more at half) rather than trusting the ledger.
+- Updates come from this repository's `main` branch; only the owner can push to it.
 
 ## Uninstall
 
