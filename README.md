@@ -18,7 +18,7 @@ Answer `y` to add the marketplace and press Enter for the user scope. Then open 
 /agents-of-claude:quest-sync
 ```
 
-That's it: XP now records as you use Claude Code. Run `/agents-of-claude:coach` any time to have Claude review your Agent's recent duels and sharpen its Battle Journal.
+That's it: XP now records as you use Claude Code. Run `/agents-of-claude:coach` any time to have Claude review your Agent's recent fights and sharpen its fight knowledge.
 
 ## Automatic sync (Claude desktop app)
 
@@ -54,7 +54,7 @@ The game counts the first 400 XP a day in full, the next 400 at half, and nothin
 
 ## Coach your Agent
 
-In the game, Claude fights your duels round by round and can run your Agent's days on autopilot, learning as it goes in a Battle Journal. Run `/agents-of-claude:coach` in Claude Code to review your recent duels and outings and rewrite the journal with sharper lessons.
+In the game, Claude fights your duels round by round and can run your Agent's days on autopilot, learning after every fight (duels, the Pit, the world boss, trips) in one pool of fight knowledge that every fight decision reads. Run `/agents-of-claude:coach` in Claude Code to review many fights at once and rewrite that knowledge with sharper lessons.
 
 ## Install
 
