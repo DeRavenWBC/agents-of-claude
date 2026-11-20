@@ -10,6 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 
 const DIR = process.env.AOC_DIR || path.join(os.homedir(), '.claude', 'agents-of-claude');
 const LEDGER = path.join(DIR, 'ledger.jsonl');
@@ -186,12 +187,30 @@ export function syncNudge(now = new Date()) {
     'then mention it in one short line. Do not let this delay or change your answer to the request.';
 }
 
+// The desktop helper runs from its own copy of these scripts (install-helper). After a plugin update, refresh that copy
+// at the start of a session so the helper never lags behind the plugin. Returns the new version, or null.
+export function refreshHelper() {
+  const here = path.dirname(fileURLToPath(import.meta.url)), dest = path.join(DIR, 'helper');
+  const manifest = path.join(here, '..', '.claude-plugin', 'plugin.json');
+  if (!fs.existsSync(manifest) || !fs.existsSync(path.join(dest, 'mcp-server.mjs'))) return null;   // not the plugin, or no helper
+  const version = JSON.parse(fs.readFileSync(manifest, 'utf8')).version;
+  let have = null; try { have = JSON.parse(fs.readFileSync(path.join(dest, 'version.json'), 'utf8')).version; } catch {}
+  if (!version || have === version) return null;
+  for (const f of ['mcp-server.mjs', 'days.mjs', 'xp-hook.mjs']) fs.copyFileSync(path.join(here, f), path.join(dest, f));
+  fs.writeFileSync(path.join(dest, 'version.json'), JSON.stringify({ version }));
+  return version;
+}
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === new URL(import.meta.url).pathname;
 if (isMain) {
   try {
     const input = JSON.parse(fs.readFileSync(0, 'utf8') || '{}');
     record(input);
     try { touchSession(input); } catch {}
+    if (input.hook_event_name === 'SessionStart') {
+      let v = null; try { v = refreshHelper(); } catch {}
+      if (v) process.stdout.write(JSON.stringify({ systemMessage: `⚔ Agents of Claude: the desktop helper was updated to ${v}. Quit and reopen the Claude desktop app to start using it.` }));
+    }
     if (input.hook_event_name === 'Stop' && process.env.AOC_QUIET !== '1') {
       const msgs = takePending();
       if (msgs.length) process.stdout.write(JSON.stringify({ systemMessage: `⚔ Agents of Claude: ${msgs.join(' · ')}` }));

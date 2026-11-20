@@ -9,7 +9,11 @@ export const LEDGER = path.join(DIR, 'ledger.jsonl');
 export const SYNC_STATE = path.join(DIR, 'sync-state.json');
 export const WINDOW_DAYS = 14;
 // This plugin's version, sent with every synced day so the game can tell players when to update.
-export const PLUGIN_VERSION = (() => { try { return JSON.parse(fs.readFileSync(new URL('../.claude-plugin/plugin.json', import.meta.url), 'utf8')).version || null; } catch { return null; } })();
+// In the plugin it reads the manifest; the desktop helper's copy reads the version.json written beside it.
+export const PLUGIN_VERSION = (() => {
+  for (const f of ['../.claude-plugin/plugin.json', './version.json']) { try { const v = JSON.parse(fs.readFileSync(new URL(f, import.meta.url), 'utf8')).version; if (v) return v; } catch {} }
+  return null;
+})();
 
 export function readLedger() {
   if (!fs.existsSync(LEDGER)) return [];

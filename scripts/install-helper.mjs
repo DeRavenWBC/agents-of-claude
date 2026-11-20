@@ -69,6 +69,8 @@ if (mode === 'uninstall') {
 
 fs.mkdirSync(DEST, { recursive: true });
 for (const f of FILES) fs.copyFileSync(path.join(HERE, f), path.join(DEST, f));
+// The copy's version, so it can report it and the plugin can refresh it after an update (xp-hook refreshHelper).
+try { fs.writeFileSync(path.join(DEST, 'version.json'), JSON.stringify({ version: JSON.parse(fs.readFileSync(path.join(HERE, '..', '.claude-plugin', 'plugin.json'), 'utf8')).version })); } catch {}
 // Prefer the `node` on PATH (e.g. /opt/homebrew/bin/node): a versioned install path breaks when Node upgrades.
 const nodeBin = (() => { try { const p = execSync(process.platform === 'win32' ? 'where node' : 'command -v node', { encoding: 'utf8' }).split(/\r?\n/)[0].trim(); return p && fs.existsSync(p) ? p : process.execPath; } catch { return process.execPath; } })();
 const entry = { command: nodeBin, args: [path.join(DEST, 'mcp-server.mjs')] };
