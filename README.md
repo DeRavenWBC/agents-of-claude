@@ -20,6 +20,14 @@ Answer `y` to add the marketplace and press Enter for the user scope. Then open 
 
 That's it: XP now records as you use Claude Code. Run `/agents-of-claude:coach` any time to have Claude review your Agent's recent fights and sharpen its fight knowledge.
 
+## Updating
+
+The game tells you when a newer plugin is out. To update, run this in a terminal and restart Claude Code:
+
+```
+claude plugin marketplace update agents-of-claude && claude plugin update agents-of-claude@agents-of-claude
+```
+
 ## Automatic sync (Claude desktop app)
 
 Open the game in the Claude desktop app and run this once in Claude Code:

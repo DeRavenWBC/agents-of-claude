@@ -5,7 +5,7 @@
 // Exposes one read-only tool. Only daily totals leave the ledger, never event detail.
 
 import readline from 'node:readline';
-import { buildDays, updateSyncState } from './days.mjs';
+import { buildDays, updateSyncState, PLUGIN_VERSION } from './days.mjs';
 
 const TOOLS = [{
   name: 'get_xp_days',
@@ -24,7 +24,7 @@ function getXpDays() {
   updateSyncState({ lastPulled: new Date().toISOString(), pulledSeq: lastSeq });
   // lastEventAt: when Claude Code last did anything (a prompt, a tool call, a finished turn), for the
   // "Claude is working / idle" status on the character sheet. Only the time and kind, never content.
-  return { days: docs, chainOk: chain.ok, brokenAtLine: chain.brokenAt, ledgerLines, lastEventAt: lastEvent?.ts || null, lastKind: lastEvent?.kind || null, sessions, generatedAt: new Date().toISOString() };
+  return { days: docs, chainOk: chain.ok, brokenAtLine: chain.brokenAt, ledgerLines, lastEventAt: lastEvent?.ts || null, lastKind: lastEvent?.kind || null, sessions, plugin: PLUGIN_VERSION, generatedAt: new Date().toISOString() };
 }
 
 const rl = readline.createInterface({ input: process.stdin });
@@ -39,7 +39,7 @@ rl.on('line', (line) => {
         return reply(id, {
           protocolVersion: params?.protocolVersion || '2025-06-18',
           capabilities: { tools: {} },
-          serverInfo: { name: 'agents-of-claude', version: '0.1.0' },
+          serverInfo: { name: 'agents-of-claude', version: PLUGIN_VERSION || '0.0.0' },
         });
       case 'ping': return reply(id, {});
       case 'tools/list': return reply(id, { tools: TOOLS });

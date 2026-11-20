@@ -8,6 +8,8 @@ export const DIR = process.env.AOC_DIR || path.join(os.homedir(), '.claude', 'ag
 export const LEDGER = path.join(DIR, 'ledger.jsonl');
 export const SYNC_STATE = path.join(DIR, 'sync-state.json');
 export const WINDOW_DAYS = 14;
+// This plugin's version, sent with every synced day so the game can tell players when to update.
+export const PLUGIN_VERSION = (() => { try { return JSON.parse(fs.readFileSync(new URL('../.claude-plugin/plugin.json', import.meta.url), 'utf8')).version || null; } catch { return null; } })();
 
 export function readLedger() {
   if (!fs.existsSync(LEDGER)) return [];
@@ -42,7 +44,7 @@ export function buildDays(now = new Date()) {
     days.set(l.day, d);
   }
   const docs = [...days.values()].sort((a, b) => a.day.localeCompare(b.day))
-    .map(d => ({ ...d, chainOk: chain.ok, syncedAt, ledgerVersion: 1 }));
+    .map(d => ({ ...d, chainOk: chain.ok, syncedAt, ledgerVersion: 1, ...(PLUGIN_VERSION ? { plugin: PLUGIN_VERSION } : {}) }));
   const lastSeq = lines.filter(l => !l.bad).at(-1)?.seq ?? 0;
   const lastEvent = [...lines].reverse().find(l => !l.bad) || null;
   // Claude Code sessions on this machine: working (event in the last 3 min) and open recently (30 min).
