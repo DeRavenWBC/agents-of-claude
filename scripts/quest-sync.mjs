@@ -3,6 +3,9 @@
 //   node quest-sync.mjs               → writes one JSON file per day for Claude to upload with ArtifactData,
 //                                       prints a JSON summary. Uploads nothing itself.
 //   node quest-sync.mjs --mark-synced → records that Claude finished uploading (stops the daily nudge).
+//   node quest-sync.mjs --cache-progress <file> → keeps only the Agent summary from a progress doc that ArtifactData
+//                                       saved (anywhere), in cache/progress.json for the status line. Claude Code
+//                                       refuses to let ArtifactData save into ~/.claude itself, so this script does it.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -14,6 +17,19 @@ const { docs, chain, ledgerLines, lastSeq } = buildDays();
 if (process.argv.includes('--mark-synced')) {
   updateSyncState({ lastSuccess: new Date().toISOString(), syncedSeq: lastSeq, via: 'claude-code' });
   console.log(JSON.stringify({ marked: true, syncedSeq: lastSeq }));
+  process.exit(0);
+}
+
+const ci = process.argv.indexOf('--cache-progress');
+if (ci >= 0) {
+  let summary = null;
+  try { const j = JSON.parse(fs.readFileSync(process.argv[ci + 1], 'utf8')); summary = j?.summary || j?.data?.summary || null; } catch {}
+  if (summary) {
+    const dir = path.join(DIR, 'cache');
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, 'progress.json'), JSON.stringify({ summary }));
+  }
+  console.log(JSON.stringify({ cached: !!summary }));
   process.exit(0);
 }
 
