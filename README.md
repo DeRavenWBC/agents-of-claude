@@ -28,6 +28,9 @@ The game tells you when a newer plugin is out. To update, run this in a terminal
 claude plugin marketplace update agents-of-claude && claude plugin update agents-of-claude@agents-of-claude
 ```
 
+If you use the desktop helper, also quit and reopen the Claude desktop app once Claude Code has started: the helper
+keeps running the old version until then.
+
 ## Automatic sync (Claude desktop app)
 
 Open the game in the Claude desktop app and run this once in Claude Code:
