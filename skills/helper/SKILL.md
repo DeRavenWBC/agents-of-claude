@@ -1,7 +1,7 @@
 ---
 name: helper
 description: Install (or remove) the Agents of Claude desktop helper, so the game syncs your XP and shows whether Claude is working automatically when opened in the Claude desktop app. Use when the player asks to set up automatic sync, install the helper, or remove it.
-allowed-tools: Bash(node *agents-of-claude*/scripts/install-helper.mjs*)
+allowed-tools: Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/install-helper.mjs"*)
 ---
 
 Install the Agents of Claude desktop helper for this player.

@@ -90,10 +90,13 @@ Then open the game, create your Agent (you need Contributor access to the page),
 
 ## Security
 
-- Skills may only run their own script (`node .../scripts/<name>.mjs`), not arbitrary commands.
-- The helper installer backs up the desktop config before every change and writes it atomically.
-- XP is self-reported: the game caps it (400 a day in full, 400 more at half) rather than trusting the ledger.
-- Updates come from this repository's `main` branch; only the owner can push to it.
+- What runs on your machine: one small script on each Claude Code hook event (session start and end, prompt, tool use, end of turn). It keeps only the kind of event and its XP in `~/.claude/agents-of-claude/`: no prompt text, file names, commands or tool output.
+- Skills may only run their own script from this plugin's own folder (`node "${CLAUDE_PLUGIN_ROOT}/scripts/<name>.mjs"`), not arbitrary commands and not a look-alike path elsewhere.
+- The coach never reads or writes your Agent's journal. It reads a brief the game prepares (every line cleaned and bounded, because names and battle text come from other players) and writes a draft the game checks before applying.
+- The helper installer backs up the desktop config before every change and writes it atomically. The helper exposes one read-only tool (daily XP totals and whether Claude is working).
+- XP is self-reported: the game caps it (400 a day in full, 400 more at half) rather than trusting the ledger. The ledger's hash chain catches accidents, not deliberate edits.
+- Updates come from this repository. Releases are tagged (`v0.5.5`, …); only the owner can push to `main`.
+- For a locked-down organization: fork this repository, review it, and install from your fork (`/plugin install agents-of-claude --marketplace <your-org>/agents-of-claude`), so nothing reaches your machines until you pull a release you have read.
 
 ## Uninstall
 

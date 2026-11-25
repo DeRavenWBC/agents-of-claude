@@ -1,7 +1,7 @@
 ---
 name: quest-sync
 description: Sync your Claude Code usage XP to Agents of Claude, the org pixel RPG. Use when the player asks to sync XP, or when an Agents of Claude reminder says a sync is due.
-allowed-tools: Bash(node *agents-of-claude*/scripts/quest-sync.mjs*), ArtifactData
+allowed-tools: Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/quest-sync.mjs"*), ArtifactData
 ---
 
 Sync this player's Agents of Claude usage XP. Game: https://claude.ai/artifact/KVff7XMzGBmd7S7h4UjdTy
