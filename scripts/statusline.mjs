@@ -6,9 +6,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import { readConfig, tzName } from './config.mjs';
 
 const DIR = process.env.AOC_DIR || path.join(os.homedir(), '.claude', 'agents-of-claude');
-const TZ = 'Africa/Johannesburg';
+const TZ = tzName(readConfig().tz);
 const today = new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date());
 const read = (p) => { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return null; } };
 function findSummary(dir) {

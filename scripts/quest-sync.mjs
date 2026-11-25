@@ -10,6 +10,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { DIR, buildDays, updateSyncState } from './days.mjs';
+import { readConfig } from './config.mjs';
 
 const OUT = path.join(DIR, 'sync');
 const { docs, chain, ledgerLines, lastSeq } = buildDays();
@@ -43,6 +44,7 @@ const summary = docs.map(doc => {
 });
 
 console.log(JSON.stringify({
+  game: readConfig().game,
   collection: 'data/users/me/xp/days',
   chainOk: chain.ok,
   brokenAtLine: chain.brokenAt,

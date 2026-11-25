@@ -20,7 +20,7 @@ import { execSync } from 'node:child_process';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DIR = process.env.AOC_DIR || path.join(os.homedir(), '.claude', 'agents-of-claude');
 const DEST = path.join(DIR, 'helper');
-const FILES = ['mcp-server.mjs', 'days.mjs', 'xp-hook.mjs'];
+const FILES = ['mcp-server.mjs', 'days.mjs', 'xp-hook.mjs', 'config.mjs'];
 const NAME = 'agents-of-claude';
 
 function configPath() {

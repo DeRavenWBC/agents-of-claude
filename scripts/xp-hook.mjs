@@ -11,12 +11,14 @@ import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { readConfig, tzName } from './config.mjs';
 
 const DIR = process.env.AOC_DIR || path.join(os.homedir(), '.claude', 'agents-of-claude');
 const LEDGER = path.join(DIR, 'ledger.jsonl');
 const STATE = path.join(DIR, 'state.json');
 const LOCK = path.join(DIR, '.lock');
-const TZ = 'Africa/Johannesburg';
+// Days end at midnight on the world's clock (the first world's unless this machine joined another: config.mjs).
+const TZ = tzName(readConfig().tz);
 export const GENESIS = '0'.repeat(64);
 
 // Base XP and rate limits (design doc: XP economy).
@@ -196,7 +198,7 @@ export function refreshHelper() {
   const version = JSON.parse(fs.readFileSync(manifest, 'utf8')).version;
   let have = null; try { have = JSON.parse(fs.readFileSync(path.join(dest, 'version.json'), 'utf8')).version; } catch {}
   if (!version || have === version) return null;
-  for (const f of ['mcp-server.mjs', 'days.mjs', 'xp-hook.mjs']) fs.copyFileSync(path.join(here, f), path.join(dest, f));
+  for (const f of ['mcp-server.mjs', 'days.mjs', 'xp-hook.mjs', 'config.mjs']) fs.copyFileSync(path.join(here, f), path.join(dest, f));
   fs.writeFileSync(path.join(dest, 'version.json'), JSON.stringify({ version }));
   return version;
 }
