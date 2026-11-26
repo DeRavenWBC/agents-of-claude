@@ -2,7 +2,7 @@
 
 Earn XP for your Agent in **Agents of Claude**, the org pixel-art RPG, from your Claude Code usage.
 
-Game: https://claude.ai/artifact/KVff7XMzGBmd7S7h4UjdTy (you need Contributor access to create an Agent).
+Game: https://claude.ai/artifact/KVff7XMzGBmd7S7h4UjdTy (you need Contributor access to create an Agent). Playing in another organization's world? See [Worlds](#worlds).
 
 ## Quick start
 
@@ -61,7 +61,7 @@ It adds a small local helper to the desktop app (one config entry, backed up fir
 | Real `git commit` | 15 | 10 a day |
 | Finished turn | 3 | 1 per 10 s |
 
-The game counts the first 400 XP a day in full, the next 400 at half, and nothing past 800. Days end at 00:00 SAST.
+The game counts the first 400 XP a day in full, the next 400 at half, and nothing past 800. Days end at 00:00 on your world's clock (SAST for the first world).
 
 ## Coach your Agent
 
@@ -93,7 +93,8 @@ Then open the game, create your Agent (you need Contributor access to the page),
 A world is one game page; each organization runs its own, and worlds don't see each other.
 
 - **Joining another organization's world:** your host gives you a page link and a clock offset. Run `/agents-of-claude:join <page link> <offset>` once (for example `/agents-of-claude:join https://claude.ai/artifact/… +01:00`), then `/agents-of-claude:quest-sync`. Players of the first world need no setup.
-- **Hosting a world:** start Claude Code in an empty folder and run `/agents-of-claude:host`. It downloads the newest release from [the releases repository](https://github.com/DeRavenWBC/agents-of-claude-releases) (or uses a bundle folder you name), asks you for your world's clock, and publishes it. It checks the bundle against its manifest before publishing anything, keeps your world's older fights counting when an update changes the combat rules, and tells the game its own join command so players see it on the setup card. The bundle's `HOSTING.md` explains sharing and what you are responsible for.
+- **Hosting a world:** start Claude Code in an empty folder and run `/agents-of-claude:host`. It downloads the newest release from [the releases repository](https://github.com/DeRavenWBC/agents-of-claude-releases), checks it against its checksum and manifest, asks for your world's clock, publishes it as yours, and tells the game its own join command so players see it on the setup card. The full guide is [HOSTING.md](https://github.com/DeRavenWBC/agents-of-claude-releases/blob/main/HOSTING.md).
+- **Updating a world you host:** your world's Home page tells you when a newer build is out (the plugin checks the releases repository whenever you sync your XP). Run `/agents-of-claude:host` and choose "update": your world's records, clock and permission set carry over, and fights from before a combat-rule change keep counting.
 
 ## Security
 
@@ -102,8 +103,12 @@ A world is one game page; each organization runs its own, and worlds don't see e
 - The coach never reads or writes your Agent's journal. It reads a brief the game prepares (every line cleaned and bounded, because names and battle text come from other players) and writes a draft the game checks before applying.
 - The helper installer backs up the desktop config before every change and writes it atomically. The helper exposes one read-only tool (daily XP totals and whether Claude is working).
 - XP is self-reported: the game caps it (400 a day in full, 400 more at half) rather than trusting the ledger. The ledger's hash chain catches accidents, not deliberate edits.
-- Updates come from this repository. Releases are tagged (`v0.6.2`, …); only the owner can push to `main`.
+- Updates come from this repository. Releases are tagged (`v0.6.3`, …); only the owner can push to `main`.
 - For a locked-down organization: fork this repository, review it, and install from your fork (`/plugin install agents-of-claude --marketplace <your-org>/agents-of-claude`), so nothing reaches your machines until you pull a release you have read.
+
+## Licence
+
+This plugin is MIT (see `LICENSE`). The game itself is not: organizations may host unmodified releases for their own members, and only the author may change it (see the releases repository's `LICENSE`).
 
 ## Uninstall
 
