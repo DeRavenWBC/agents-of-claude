@@ -1,24 +1,30 @@
 #!/usr/bin/env node
 // Agents of Claude — get a checked world bundle ready to publish.
-//   node prepare-world.mjs <bundle folder> [<pull folder>]
+//   node prepare-world.mjs <bundle folder> [<pull folder>] [--tz +01:00 --tz-label CET]
 //
 // Copies the bundle to "<bundle folder>-publish" and, when given a pull of the world's own records (the `bouts`,
 // `duels` and `worldboss` collections saved by ArtifactData list with out_dir), rebuilds engine/trusted.js there: the
 // list of records fought under older combat rules that the world had on file when this update arrives. Those records
 // can't be re-simulated by the new build, so only the listed ones keep counting. A new world passes no pull (its list
-// stays empty). The bundle's code is only read here, never run. Prints what to publish.
+// stays empty). --tz / --tz-label set the world's clock (a new world picks it once; an update must pass the world's
+// own clock from meta/world). The bundle's code is only read here, never run. Prints what to publish.
 import fs from 'node:fs';
 import path from 'node:path';
 
 const out = (o) => { console.log(JSON.stringify(o, null, 2)); process.exit(0); };
-const src = path.resolve(process.argv[2] || ''), pull = process.argv[3] ? path.resolve(process.argv[3]) : null;
+const args = process.argv.slice(2), opt = (k) => { const i = args.indexOf(k); if (i < 0) return null; const v = args[i + 1]; args.splice(i, 2); return v ?? ''; };
+const tzArg = opt('--tz'), labelArg = opt('--tz-label');
+const src = path.resolve(args[0] || ''), pull = args[1] ? path.resolve(args[1]) : null;
+if ((tzArg != null) !== (labelArg != null)) out({ ok: false, reason: 'Give --tz and --tz-label together, e.g. --tz +01:00 --tz-label CET.' });
+if (tzArg != null && !/^[+-](0\d|1[0-4]):00$/.test(tzArg)) out({ ok: false, reason: 'The clock offset must be whole hours, like +01:00 or -05:00.' });
+if (labelArg != null && !/^[A-Za-z0-9+: -]{1,12}$/.test(labelArg)) out({ ok: false, reason: 'The clock label must be up to 12 letters, digits, spaces, + : or -.' });
 if (!fs.existsSync(path.join(src, 'MANIFEST.json'))) out({ ok: false, reason: `No MANIFEST.json in ${src}. Run verify-bundle.mjs on the bundle first.` });
 const battle = fs.readFileSync(path.join(src, 'engine', 'battle.js'), 'utf8');
 const epoch = +(battle.match(/export const RULES_EPOCH = (\d+);/)?.[1] ?? NaN);
 const sinceText = battle.match(/export const EPOCH_SINCE = Date\.parse\('([^']+)'\);/)?.[1], since = Date.parse(sinceText || '');
 if (!Number.isInteger(epoch) || !Number.isFinite(since)) out({ ok: false, reason: 'Could not read the combat rules version from the bundle.' });
 // The same test the engine uses (battle.js rulesOf): an older epoch counts as "old" only if it predates the switch.
-let TZ = '+02:00'; try { const o = JSON.parse(fs.readFileSync(path.join(src, 'MANIFEST.json'), 'utf8')).clock?.offset; if (/^[+-]\d{2}:00$/.test(o || '')) TZ = o; } catch {}
+let TZ = tzArg || '+02:00'; if (!tzArg) try { const o = JSON.parse(fs.readFileSync(path.join(src, 'MANIFEST.json'), 'utf8')).clock?.offset; if (/^[+-]\d{2}:00$/.test(o || '')) TZ = o; } catch {}
 const isOld = (v, at) => { const e = Number.isInteger(v) ? v : 1; return e < epoch && Number.isFinite(at) && at < since + 86_400_000; };
 const s = (v) => String(v ?? '').slice(0, 120);   // the same keys as engine/trusted-keys.js
 const boutKey = (b) => `${s(b.id)}|${s(b.c)}|${s(b.d)}|${s(b.at)}|${s(b.winner)}|${s(b.hash)}`;
@@ -46,6 +52,14 @@ const BOSS = new Set(${list(lists.boss)});
 export const trustedOld = { bout: (b) => BOUTS.has(boutKey(b)), duel: (r) => DUELS.has(duelKey(r)), boss: (uid, a) => BOSS.has(bossKey(uid, a)) };
 `);
 const man = JSON.parse(fs.readFileSync(path.join(src, 'MANIFEST.json'), 'utf8'));
+let clock = man.clock;
+if (tzArg) {   // the world's clock: the only per-world setting (engine/worldtime.js)
+  const f = path.join(dst, 'engine', 'worldtime.js'), hours = (tzArg[0] === '-' ? -1 : 1) * +tzArg.slice(1, 3);
+  const w = fs.readFileSync(f, 'utf8').replace(/export const TZ_OFFSET_MS = [^;]+;/, `export const TZ_OFFSET_MS = ${hours} * 3_600_000;`)
+    .replace(/export const TZ_ISO = '[^']+';/, `export const TZ_ISO = '${tzArg}';`).replace(/export const TZ_LABEL = '[^']+';/, `export const TZ_LABEL = '${labelArg}';`);
+  if (!w.includes(`TZ_ISO = '${tzArg}'`) || !w.includes(`TZ_LABEL = '${labelArg}'`)) out({ ok: false, reason: 'Could not set the world clock in engine/worldtime.js.' });
+  fs.writeFileSync(f, w); clock = { offset: tzArg, label: labelArg };
+}
 const engine = Object.keys(man.files || {}).filter(f => /^engine\/[A-Za-z0-9._-]+\.js$/.test(f)).sort();
-out({ ok: true, dir: dst, page: 'game/index.html', build: man.build, clock: man.clock, files: Object.fromEntries(engine.map(f => [f, f])),
+out({ ok: true, dir: dst, page: 'game/index.html', build: man.build, clock, files: Object.fromEntries(engine.map(f => [f, f])),
   trusted: { bouts: lists.bouts.size, duels: lists.duels.size, boss: lists.boss.size, fromPull: !!pull } });
