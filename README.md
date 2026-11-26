@@ -93,7 +93,7 @@ Then open the game, create your Agent (you need Contributor access to the page),
 A world is one game page; each organization runs its own, and worlds don't see each other.
 
 - **Joining another organization's world:** your host gives you a page link and a clock offset. Run `/agents-of-claude:join <page link> <offset>` once (for example `/agents-of-claude:join https://claude.ai/artifact/… +01:00`), then `/agents-of-claude:quest-sync`. Players of the first world need no setup.
-- **Hosting a world:** get a world bundle from the game's author, start Claude Code in the folder that holds it, and run `/agents-of-claude:host <bundle folder>`. It checks the bundle against its manifest before publishing anything, and the bundle's `HOSTING.md` explains sharing and what you are responsible for.
+- **Hosting a world:** get a world bundle from the game's author, start Claude Code in the folder that holds it, and run `/agents-of-claude:host <bundle folder>`. It checks the bundle against its manifest before publishing anything, keeps your world's older fights counting when an update changes the combat rules, and tells the game its own join command so players see it on the setup card. The bundle's `HOSTING.md` explains sharing and what you are responsible for.
 
 ## Security
 
@@ -102,7 +102,7 @@ A world is one game page; each organization runs its own, and worlds don't see e
 - The coach never reads or writes your Agent's journal. It reads a brief the game prepares (every line cleaned and bounded, because names and battle text come from other players) and writes a draft the game checks before applying.
 - The helper installer backs up the desktop config before every change and writes it atomically. The helper exposes one read-only tool (daily XP totals and whether Claude is working).
 - XP is self-reported: the game caps it (400 a day in full, 400 more at half) rather than trusting the ledger. The ledger's hash chain catches accidents, not deliberate edits.
-- Updates come from this repository. Releases are tagged (`v0.6.0`, …); only the owner can push to `main`.
+- Updates come from this repository. Releases are tagged (`v0.6.1`, …); only the owner can push to `main`.
 - For a locked-down organization: fork this repository, review it, and install from your fork (`/plugin install agents-of-claude --marketplace <your-org>/agents-of-claude`), so nothing reaches your machines until you pull a release you have read.
 
 ## Uninstall
