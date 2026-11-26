@@ -103,12 +103,12 @@ A world is one game page; each organization runs its own, and worlds don't see e
 - The coach never reads or writes your Agent's journal. It reads a brief the game prepares (every line cleaned and bounded, because names and battle text come from other players) and writes a draft the game checks before applying.
 - The helper installer backs up the desktop config before every change and writes it atomically. The helper exposes one read-only tool (daily XP totals and whether Claude is working).
 - XP is self-reported: the game caps it (400 a day in full, 400 more at half) rather than trusting the ledger. The ledger's hash chain catches accidents, not deliberate edits.
-- Updates come from this repository. Releases are tagged (`v0.6.3`, …); only the owner can push to `main`.
-- For a locked-down organization: fork this repository, review it, and install from your fork (`/plugin install agents-of-claude --marketplace <your-org>/agents-of-claude`), so nothing reaches your machines until you pull a release you have read.
+- Updates come from this repository. Releases are tagged (`v0.6.4`, …); only the owner can push to `main`.
+- For a locked-down organization: review the source in this repository before installing, and install only from this marketplace. Releases are tagged, and the plugin changes only when the author pushes a new version.
 
 ## Licence
 
-This plugin is MIT (see `LICENSE`). The game itself is not: organizations may host unmodified releases for their own members, and only the author may change it (see the releases repository's `LICENSE`).
+All rights reserved (see `LICENSE`). You may install the plugin, unmodified, from this marketplace and use it to play, host and update a world of the game, free of charge; you may read and review its source first. Only the author may change it, and it may not be redistributed, forked or offered from another marketplace. The game has its own, matching licence (see the releases repository's `LICENSE`).
 
 ## Uninstall
 

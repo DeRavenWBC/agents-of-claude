@@ -1,21 +1,28 @@
-MIT License
+Agents of Claude Claude Code plugin: Licence
 
-Copyright (c) 2026 Agents of Claude contributors
+Copyright (c) 2026 DeRaven Stoltz (github.com/DeRavenWBC). All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This licence covers the Agents of Claude Claude Code plugin in this repository: its scripts, skills, hooks, manifests
+and documentation (together, "the Plugin").
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Permission to use. You may install the Plugin from its official marketplace (DeRavenWBC/agents-of-claude), unmodified,
+   and use it to play Agents of Claude, and to host and update a world of the game for your own organization, free of
+   charge. You may read and review its source before installing it.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. No changes. You may not modify, adapt, translate, or create derivative works of the Plugin, in whole or in part.
+   Settings the Plugin itself writes on your machine (such as which world you play in) are not changes to the Plugin.
+   Only the copyright owner may change the Plugin.
+
+3. No redistribution. You may not sell, rent, sublicense, or redistribute the Plugin, publish copies or forks of it, or
+   offer it from any other marketplace. You may link to the official repository.
+
+4. Notices. Keep this licence and the copyright notice with every copy of the Plugin you hold.
+
+5. Ownership. The copyright owner keeps all rights in the Plugin not expressly granted here. The XP ledger and settings
+   the Plugin keeps on your machine are yours.
+
+6. No warranty. The Plugin is provided "as is", without warranty of any kind, express or implied. In no event is the
+   copyright owner liable for any claim, damages, or other liability arising from the Plugin or its use.
+
+7. Ending. These permissions end automatically if you break these terms; you must then uninstall the Plugin and delete
+   your copies.
